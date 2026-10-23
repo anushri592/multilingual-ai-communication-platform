@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual AI Communication Platform</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f5ff;
+            color: #202747;
+        }
+
+        header {
+            background: #4338ca;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px #d9def0;
+        }
+
+        textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccd2e5;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #4338ca;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #result {
+            background: #eef2ff;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 25px;
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Multilingual AI</h1>
+        <p>Connect People Through Languages</p>
+    </header>
+
+    <main>
+        <h2>Language Translator</h2>
+
+        <label for="source">Your Language</label>
+        <select id="source">
+            <option value="en">English</option>
+            <option value="ta">Tamil</option>
+            <option value="hi">Hindi</option>
+            <option value="fr">French</option>
+            <option value="es">Spanish</option>
+        </select>
+
+        <label for="target">Translate Into</label>
+        <select id="target">
+            <option value="ta">Tamil</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="fr">French</option>
+            <option value="es">Spanish</option>
+        </select>
+
+        <label for="message">Enter Your Message</label>
+        <textarea id="message" rows="5"
+            placeholder="Type your message here..."></textarea>
+
+        <button onclick="translateText()">Translate</button>
+
+        <h3>Translation Result</h3>
+        <div id="result">Your translation will appear here.</div>
+    </main>
+
+    <script>
+        async function translateText() {
+    const message = document.getElementById("message").value.trim();
+    const source = document.getElementById("source").value;
+    const target = document.getElementById("target").value;
+    const result = document.getElementById("result");
+
+    if (!message) {
+        result.textContent = "Please enter a message first.";
+        return;
+    }
+
+    result.textContent = "Translating...";
+
+    try {
+        const response = await fetch("/translate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message,
+                source: source,
+                target: target
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Translation failed.");
+        }
+
+        result.textContent = data.translation;
+
+    } catch (error) {
+        result.textContent = error.message ||
+            "Could not connect to the backend.";
+    }
+}
+    </script>
+</body>
+</html>
