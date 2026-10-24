@@ -1,141 +1,173 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multilingual AI Communication Platform</title>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f2f5ff;
-            color: #202747;
-        }
-
-        header {
-            background: #4338ca;
-            color: white;
-            padding: 22px;
-            text-align: center;
-        }
-
-        main {
-            max-width: 700px;
-            margin: 40px auto;
-            padding: 25px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 5px 20px #d9def0;
-        }
-
-        textarea, select {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            box-sizing: border-box;
-            border: 1px solid #ccd2e5;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        button {
-            background: #4338ca;
-            color: white;
-            border: none;
-            padding: 12px 22px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        #result {
-            background: #eef2ff;
-            padding: 15px;
-            border-radius: 8px;
-            min-height: 25px;
-            overflow-wrap: anywhere;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multilingual AI Communication Platform</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#eef2ff;color:#20243a}
+header{background:#3730a3;color:white;text-align:center;padding:28px 15px}
+main{max-width:760px;margin:30px auto;padding:25px;background:white;border-radius:16px;box-shadow:0 5px 20px #0001}
+label{display:block;font-weight:bold;margin:16px 0 7px}
+textarea,select{width:100%;padding:12px;border:1px solid #cbd0df;border-radius:8px;font-size:16px}
+textarea{min-height:140px;resize:vertical}
+.languages{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+button{padding:13px;border:0;border-radius:8px;background:#4338ca;color:white;font-size:16px;cursor:pointer}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.actions button{flex:1}
+#output{margin-top:15px;padding:16px;min-height:80px;background:#f4f5fb;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+footer{text-align:center;padding:18px;color:#666}
+@media(max-width:500px){main{margin:15px;padding:18px}.languages{grid-template-columns:1fr}}
+</style>
 </head>
-
 <body>
-    <header>
-        <h1>Multilingual AI</h1>
-        <p>Connect People Through Languages</p>
-    </header>
+<header>
+<h1>Multilingual AI Communication Platform</h1>
+<p>Translate and listen across languages</p>
+</header>
 
-    <main>
-        <h2>Language Translator</h2>
+<main>
+<h2>Text Translator</h2>
 
-        <label for="source">Your Language</label>
-        <select id="source">
-            <option value="en">English</option>
-            <option value="ta">Tamil</option>
-            <option value="hi">Hindi</option>
-            <option value="fr">French</option>
-            <option value="es">Spanish</option>
-        </select>
+<label for="message">Enter your text</label>
+<textarea id="message" placeholder="Type your message here..."></textarea>
 
-        <label for="target">Translate Into</label>
-        <select id="target">
-            <option value="ta">Tamil</option>
-            <option value="en">English</option>
-            <option value="hi">Hindi</option>
-            <option value="fr">French</option>
-            <option value="es">Spanish</option>
-        </select>
+<div class="languages">
+<div>
+<label for="source">From</label>
+<select id="source">
+<option value="en">English</option>
+<option value="ta">Tamil</option>
+<option value="hi">Hindi</option>
+<option value="fr">French</option>
+<option value="es">Spanish</option>
+</select>
+</div>
+<div>
+<label for="target">To</label>
+<select id="target">
+<option value="ta">Tamil</option>
+<option value="en">English</option>
+<option value="hi">Hindi</option>
+<option value="fr">French</option>
+<option value="es">Spanish</option>
+</select>
+</div>
+</div>
 
-        <label for="message">Enter Your Message</label>
-        <textarea id="message" rows="5"
-            placeholder="Type your message here..."></textarea>
+<div class="actions">
+<button id="translateBtn" onclick="translateText()">Translate</button>
+<button onclick="clearText()">Clear</button>
+</div>
 
-        <button onclick="translateText()">Translate</button>
+<h3>Translation Result</h3>
+<div id="output" aria-live="polite">Your translation will appear here.</div>
 
-        <h3>Translation Result</h3>
-        <div id="result">Your translation will appear here.</div>
-    </main>
+<div class="actions">
+<button onclick="copyResult()">Copy Translation</button>
+<button onclick="listenTranslation()">Listen</button>
+<button onclick="stopAudio()">Stop Audio</button>
+</div>
+</main>
 
-    <script>
-        async function translateText() {
-    const message = document.getElementById("message").value.trim();
-    const source = document.getElementById("source").value;
-    const target = document.getElementById("target").value;
-    const result = document.getElementById("result");
+<footer>Multilingual AI Communication Platform</footer>
 
-    if (!message) {
-        result.textContent = "Please enter a message first.";
-        return;
+<script>
+let latestTranslation = "";
+
+async function translateText(){
+  const message = document.getElementById("message").value.trim();
+  const source = document.getElementById("source").value;
+  const target = document.getElementById("target").value;
+  const output = document.getElementById("output");
+  const button = document.getElementById("translateBtn");
+
+  if(!message){
+    output.textContent = "Please enter text first.";
+    return;
+  }
+
+  button.disabled = true;
+  output.textContent = "Translating...";
+  stopAudio();
+
+  try{
+    const response = await fetch("/translate", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message, source, target})
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      throw new Error(data.error || "Translation failed.");
     }
 
-    result.textContent = "Translating...";
-
-    try {
-        const response = await fetch("/translate", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: message,
-                source: source,
-                target: target
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || "Translation failed.");
-        }
-
-        result.textContent = data.translation;
-
-    } catch (error) {
-        result.textContent = error.message ||
-            "Could not connect to the backend.";
-    }
+    latestTranslation = data.translation;
+    output.textContent = latestTranslation;
+  }catch(error){
+    latestTranslation = "";
+    output.textContent = error.message || "Unable to translate.";
+  }finally{
+    button.disabled = false;
+  }
 }
-    </script>
+
+async function copyResult(){
+  if(!latestTranslation){
+    alert("Translate some text first.");
+    return;
+  }
+
+  try{
+    await navigator.clipboard.writeText(latestTranslation);
+    alert("Translation copied.");
+  }catch{
+    alert("Copy is unavailable in this browser.");
+  }
+}
+
+function listenTranslation(){
+  if(!latestTranslation){
+    alert("Translate some text first.");
+    return;
+  }
+
+  if(!("speechSynthesis" in window)){
+    alert("Text-to-speech is not supported by this browser.");
+    return;
+  }
+
+  stopAudio();
+
+  const target = document.getElementById("target").value;
+  const voices = {
+    en: "en-IN",
+    ta: "ta-IN",
+    hi: "hi-IN",
+    fr: "fr-FR",
+    es: "es-ES"
+  };
+
+  const utterance = new SpeechSynthesisUtterance(latestTranslation);
+  utterance.lang = voices[target];
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopAudio(){
+  if("speechSynthesis" in window){
+    window.speechSynthesis.cancel();
+  }
+}
+
+function clearText(){
+  document.getElementById("message").value = "";
+  document.getElementById("output").textContent = "Your translation will appear here.";
+  latestTranslation = "";
+  stopAudio();
+}
+</script>
 </body>
 </html>
